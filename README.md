@@ -28,14 +28,22 @@ way to do that is:
 1. Download and unpack
    [the binary distribution.](https://dl.sandstorm.io/meteor-spk-0.1.1.tar.xz)
 2. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
-   a directory in your `$PATH`, e.g.: `ln -s $PWD/meteor-spk ~/bin`
+   a directory in your `$PATH`, e.g.:
+
+        ln -s $PWD/meteor-spk ~/bin
 
 ### Installing `meteor-spk` from source
 
-1. Check out this github repository.
+1. Check out this github repository. Note that you must use the `--recursive`
+   flag to ensure that submodules are cloned as well:
+
+        git clone --recursive https://github.com/sandstorm-io/meteor-spk.git
+
 2. Run `make`.
 3. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
-   a directory in your `$PATH`, e.g.: `ln -s $PWD/meteor-spk ~/bin`
+   a directory in your `$PATH`, e.g.:
+
+        ln -s $PWD/meteor-spk ~/bin
 
 ## Packaging your app
 
