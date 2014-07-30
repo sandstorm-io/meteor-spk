@@ -1,4 +1,4 @@
-VERSION=0.1.0
+VERSION=0.1.1
 
 meteor-spk.deps: mongo/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
@@ -11,9 +11,10 @@ mongo/mongod:
 dist: meteor-spk-$(VERSION).tar.xz
 
 meteor-spk-$(VERSION).tar.xz: meteor-spk meteor-spk.deps README.md NOTICE
-	tar --transform 's,^,meteor-spk-$(VERSION)/,' -Jcf meteor-spk-$(VERSION).tar.xz meteor-spk meteor-spk.deps README.md NOTICE
+	tar --transform 's,^,meteor-spk-$(VERSION)/,rSh' -Jcf meteor-spk-$(VERSION).tar.xz meteor-spk meteor-spk.deps README.md NOTICE
 
 push: meteor-spk-$(VERSION).tar.xz
+	grep -q "meteor-spk-$(VERSION)[.]tar" README.md
 	gcutil push fe meteor-spk-$(VERSION).tar.xz /var/www/dl.sandstorm.io/meteor-spk-$(VERSION).tar.xz
 
 clean:
