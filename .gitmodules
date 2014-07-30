@@ -1,0 +1,4 @@
+[submodule "mongo"]
+	path = mongo
+	url = git://github.com/kentonv/mongo.git
+	branch = niscu

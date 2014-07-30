@@ -1,0 +1,72 @@
+#! /bin/bash
+
+set -euo pipefail
+
+DEPS_DIR=$(readlink -f "${BASH_SOURCE[0]}").deps
+
+if [ ! -e "$DEPS_DIR" ]; then
+  echo "Couldn't find $0's dependencies; expected in: $DEPS_DIR" >&2
+  exit 1
+fi
+
+if [ ! -e .meteor/release ]; then
+  echo "This directory does not appear to contain a Meteor application." >&2
+  exit 1
+fi
+
+if [ $# = 0 ]; then
+  echo "Missing command. Try: $0 help" >&2
+  exit 1
+fi
+
+COMMAND=$1
+shift
+
+makedotdir() {
+  mkdir -p .meteor-spk
+  ln -sfT "$DEPS_DIR" .meteor-spk/deps
+}
+
+bundle() {
+  makedotdir
+
+  echo "Building Meteor app..."
+  meteor bundle --directory .meteor-spk/bundle
+}
+
+case "$COMMAND" in
+  init )
+    makedotdir
+    spk init -p 4000 -I.meteor-spk/deps -I.meteor-spk/bundle -A "$@" -- node start.js
+    if [ -e .git ]; then
+      cat >> .gitignore << __EOF__
+.meteor-spk
+__EOF__
+    fi
+    ;;
+  dev )
+    bundle
+    spk dev "$@"
+    ;;
+  pack )
+    bundle
+    spk pack "$@"
+    ;;
+  clean )
+    rm -rf .meteor-spk/bundle
+    ;;
+  help )
+    cat << __EOF__
+$0 is much like Sandstorm's standard 'spk' tool except that it includes some
+Meteor-specific shortcuts. In particular:
+- You don't need to pass any arguments to 'init'.
+- You don't need to worry about setting up a source map to define what is in
+  your package. The 'dev' and 'pack' commands will automatically bundle your
+  Meteor app together with everything that is needed.
+__EOF__
+    ;;
+  * )
+    spk "$COMMAND" "$@"
+    ;;
+esac
+
