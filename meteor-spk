@@ -27,9 +27,22 @@
 set -euo pipefail
 
 DEPS_DIR=$(readlink -f "${BASH_SOURCE[0]}").deps
+METEOR_WAREHOUSE_DIR="${METEOR_WAREHOUSE_DIR:-$HOME/.meteor}"
 
 if [ ! -e "$DEPS_DIR" ]; then
   echo "Couldn't find $0's dependencies; expected in: $DEPS_DIR" >&2
+  exit 1
+fi
+
+if [ ! -x "$METEOR_WAREHOUSE_DIR/meteor" ]; then
+  echo "Couldn't find Meteor installation. Please install Meteor." >&2
+  exit 1
+fi
+
+METEOR_DEV_BUNDLE=$(dirname $(readlink -f "$METEOR_WAREHOUSE_DIR/meteor"))/dev_bundle
+if [ ! -e "$METEOR_DEV_BUNDLE/bin/node" ]; then
+  echo "Meteor installation is not laid out like I expected." >&2
+  echo "This tool requires Meteor version 0.9.0 or newer." >&2
   exit 1
 fi
 
@@ -56,6 +69,7 @@ bundle() {
 
   echo "Building Meteor app..."
   meteor bundle --directory .meteor-spk/bundle
+  (cd .meteor-spk/bundle/programs/server && "$METEOR_DEV_BUNDLE/bin/npm" install)
 }
 
 case "$COMMAND" in

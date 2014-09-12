@@ -84,15 +84,15 @@ copyDeps() {
 
 rm -rf bundle
 mkdir bundle
-METEOR=$HOME/.meteor
-METEOR_TOOLS=$METEOR/tools/$(json tools < $METEOR/releases/latest)
+METEOR_WAREHOUSE_DIR="${METEOR_WAREHOUSE_DIR:-$HOME/.meteor}"
+METEOR_DEV_BUNDLE=$(dirname $(readlink -f "$METEOR_WAREHOUSE_DIR/meteor"))/dev_bundle
 
 cp start.js bundle/start.js
 
 # Copy over key binaries.
 mkdir -p bundle/bin
 cp mongo/mongod bundle/bin/niscud
-cp $METEOR_TOOLS/bin/node bundle/bin
+cp $METEOR_DEV_BUNDLE/bin/node bundle/bin
 
 # Binaries copied from Meteor aren't writable by default.
 chmod u+w bundle/bin/*

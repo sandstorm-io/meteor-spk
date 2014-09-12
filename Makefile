@@ -1,4 +1,4 @@
-VERSION=0.1.1
+VERSION=0.1.2
 
 meteor-spk.deps: mongo/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
