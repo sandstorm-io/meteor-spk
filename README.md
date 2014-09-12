@@ -68,8 +68,9 @@ To package your existing Meteor app, simply do the following:
 
 ## Tips
 
-* If your app uses accounts, add the `accounts-sandstorm` package to integrate
-  with Sandstorm's login system.
+* If your app uses accounts, add the package
+  [`kenton:accounts-sandstorm`](https://github.com/sandstorm-io/meteor-accounts-sandstorm)
+  to integrate with Sandstorm's login system.
 * That said, there is often no need for accounts because instances of your app
   are already private, viewable only to the owner and people with whom they
   explicitly shared it. You might as well give all of these users full access,
