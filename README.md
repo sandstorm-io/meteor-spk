@@ -26,7 +26,7 @@ way to do that is:
 ### Installing `meteor-spk` from binaries
 
 1. Download and unpack
-   [the binary distribution.](https://dl.sandstorm.io/meteor-spk-0.1.3.tar.xz)
+   [the binary distribution.](https://dl.sandstorm.io/meteor-spk-0.1.4.tar.xz)
 2. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
    a directory in your `$PATH`, e.g.:
 
