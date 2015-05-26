@@ -58,7 +58,7 @@ To package your existing Meteor app, simply do the following:
    must be a member of the server's group. The tool will connect to that
    server and temporarily make your app available for testing. When done
    testing, use ctrl+C in the terminal to stop.
-4. Run `meteor-spk build example.spk` to create a Sandstorm package file called
+4. Run `meteor-spk pack example.spk` to create a Sandstorm package file called
    `example.spk`. WARNING: You may want to place this file outside of your
    source directory as otherwise Meteor will think it is part of the app
    and will include it in the app bundle. This means if you repeatedly run
