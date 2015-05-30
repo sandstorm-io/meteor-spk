@@ -4,7 +4,15 @@ meteor-spk.deps: mongo/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
 	./gather-deps.sh
 
-mongo/mongod:
+# The following rule is only triggered if the person who
+# cloned this repo forgot to clone with "git clone --recursive".
+#
+# We use "false" to cause make to stop processing.
+mongo/SConstruct:
+	@echo "**** ERROR: You need to do 'git submodule init; git submodule update' ****"
+	@false
+
+mongo/mongod: mongo/SConstruct
 	@echo "**** Building NiscuDB (modified MongoDB)..."
 	cd mongo && scons -j6 mongod
 
@@ -22,4 +30,3 @@ clean:
 	cd mongo && scons -c
 
 .PHONY: dist clean push
-
