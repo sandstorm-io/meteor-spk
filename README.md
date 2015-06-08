@@ -41,7 +41,7 @@ way to do that is:
 
 ## Packaging your app
 
-To package your existing Meteor app, simply do the following:
+To package your existing Meteor app, do the following:
 
 1. Run `meteor-spk init` in your app's source tree.
 2. Open the generated file `sandstorm-pkgdef.capnp` in a text editor. Read
@@ -70,7 +70,7 @@ To package your existing Meteor app, simply do the following:
   explicitly shared it. You might as well give all of these users full access,
   and rely on Sandstorm for protection.
 * If your app is document-oriented, you should design it to host only a single
-  document. Users can simply create multiple instances of your app if they
+  document. Users can create multiple instances of your app if they
   want multiple documents. In fact, it's better that way, because then the
   instances can be independently shared.
 * All of this means that it's often OK to leave `autopublish` and `insecure`
