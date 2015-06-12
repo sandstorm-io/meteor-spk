@@ -26,28 +26,22 @@ way to do that is:
 ### Installing `meteor-spk` from binaries
 
 1. Download and unpack
-   [the binary distribution.](https://dl.sandstorm.io/meteor-spk-0.1.4.tar.xz)
+   [the binary distribution](https://dl.sandstorm.io/meteor-spk-0.1.4.tar.xz),
+   e.g.:
+
+        mkdir -p ~/projects/meteor-spk
+        cd ~/projects/meteor-spk
+        curl https://dl.sandstorm.io/meteor-spk-0.1.4.tar.xz | tar Jxf -
+        cd meteor-spk-0.1.4
+
 2. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
-   a directory in your `$PATH`, e.g.:
-
-        ln -s $PWD/meteor-spk ~/bin
-
-### Installing `meteor-spk` from source
-
-1. Check out this github repository. Note that you must use the `--recursive`
-   flag to ensure that submodules are cloned as well:
-
-        git clone --recursive https://github.com/sandstorm-io/meteor-spk.git
-
-2. Run `make`.
-3. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
    a directory in your `$PATH`, e.g.:
 
         ln -s $PWD/meteor-spk ~/bin
 
 ## Packaging your app
 
-To package your existing Meteor app, simply do the following:
+To package your existing Meteor app, do the following:
 
 1. Run `meteor-spk init` in your app's source tree.
 2. Open the generated file `sandstorm-pkgdef.capnp` in a text editor. Read
@@ -76,10 +70,24 @@ To package your existing Meteor app, simply do the following:
   explicitly shared it. You might as well give all of these users full access,
   and rely on Sandstorm for protection.
 * If your app is document-oriented, you should design it to host only a single
-  document. Users can simply create multiple instances of your app if they
+  document. Users can create multiple instances of your app if they
   want multiple documents. In fact, it's better that way, because then the
   instances can be independently shared.
 * All of this means that it's often OK to leave `autopublish` and `insecure`
   on! If all users have full access anyway, and the data set is limited to
   one document, then there's no problem.
 
+## Developing `meteor-spk`
+
+### Installing `meteor-spk` from source
+
+1. Check out this github repository. Note that you must use the `--recursive`
+   flag to ensure that submodules are cloned as well:
+
+        git clone --recursive https://github.com/sandstorm-io/meteor-spk.git
+
+2. Run `make`.
+3. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
+   a directory in your `$PATH`, e.g.:
+
+        ln -s $PWD/meteor-spk ~/bin
