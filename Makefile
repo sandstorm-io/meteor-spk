@@ -21,7 +21,7 @@ mongo/SConstruct:
 
 mongo/mongod: mongo/SConstruct
 	@echo "**** Building MongoDB (modified MongoDB)..."
-	cd mongo && scons -j6 mongod mongodump mongorestore --disable-warnings-as-errors
+	cd mongo && scons -j6 mongod --disable-warnings-as-errors
 
 niscu/SConstruct:
 	@echo "**** ERROR: You need to do 'git submodule init; git submodule update' ****"
