@@ -23,35 +23,102 @@
 // meteor-spk will automatically include this in your package; you don't need
 // to worry about it.
 
-var spawn = require("child_process").spawn;
+var child_process = require("child_process");
+var fs = require("fs");
 
-console.log("** Starting Mongo...");
+var dbPath = "/var/wiredTigerDb"
 
-var db = spawn("/bin/niscud", [ "--fork", "--port", "4002", "--dbpath", "/var",
-    "--noauth", "--bind_ip", "127.0.0.1", "--nohttpinterface", "--noprealloc",
-    "--logpath", "/var/mongo.log" ], {
-      stdio: "inherit"
-    })
-
-db.on("error", function (err) {
-  console.error("Couldn't start Mongo: " + err.stack);
-  process.exit(1);
-});
-
-db.on("exit", function (code, signal) {
-  if (signal) {
-    console.error("Mongo startup failed with signal: " + signal);
+function runChildProcess(child, name, continuation) {
+  child.on("error", function (err) {
+    console.error("error in " + name + ": "  + err.stack);
     process.exit(1);
-  }
-  if (code !== 0) {
-    console.error("Mongo startup exited with error code: " + code);
-    process.exit(1);
-  }
-  
+  });
+
+  child.on("exit", function (code, signal) {
+    if (signal) {
+      console.error(name + " failed with signal: " + signal);
+      process.exit(1);
+    }
+    if (code !== 0) {
+      console.error(name + " exited with error code: " + code);
+      process.exit(1);
+    }
+    continuation();
+  });
+}
+
+function startMongo(continuation) {
+  console.log("** Starting Mongo...");
+  var db = child_process.spawn("/bin/mongod",
+                               [ "--fork", "--port", "4002", "--dbpath", dbPath,
+                                 "--noauth", "--bind_ip", "127.0.0.1", "--nohttpinterface",
+                                 "--storageEngine", "wiredTiger",
+                                 "--wiredTigerEngineConfigString", "log=(prealloc=false,file_max=200KB)",
+                                 "--wiredTigerCacheSizeGB", "1",
+                                 "--logpath", dbPath + "/mongo.log" ],
+                               { stdio: "inherit" });
+
+  runChildProcess(db, "Mongo", continuation);
+}
+
+function runApp() {
   console.log("** Starting Meteor...");
   process.env.MONGO_URL="mongodb://127.0.0.1:4002/meteor";
   process.env.ROOT_URL="http://127.0.0.1:4000";
   process.env.PORT="4000";
   require("./main.js");
-});
+}
+
+var migrationDumpPath = "/var/migrationMongoDump";
+
+if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
+  startMongo(runApp);
+} else {
+  // The old database was in /var.
+  if (!fs.existsSync("/var/journal")) {
+    // No migration required.
+    fs.mkdirSync(dbPath);
+    startMongo(runApp);
+  } else {
+    console.log("Starting migration to WiredTiger storage engine...");
+
+    if (fs.existsSync(migrationDumpPath)) {
+      console.log("It looks like a previous attempt to migrate failed. Cleaning it up...");
+      var now = (new Date()).getTime();
+      if (fs.existsSync(dbPath)) {
+        fs.rename(dbPath, "/var/failedMigration" + now);
+      }
+      fs.rename(migrationDumpPath, "/var/failedMigrationDump" + now);
+    }
+
+    console.log("launching niscd");
+    var oldDb = child_process.spawn("/bin/niscud", [ "--port", "4002", "--dbpath", "/var",
+                                                     "--noauth", "--bind_ip", "127.0.0.1",
+                                                     "--nohttpinterface", "--noprealloc",
+                                                     "--logpath", "/var/mongo.log" ], {
+                                                       stdio: "inherit"
+                                                     });
+    // TODO: We ought to wait for "waiting for connections" on stdout.
+    runChildProcess(oldDb, "nisucd", function () {});
+
+    var dump = child_process.spawn("/bin/mongodump",
+                                   ["--host", "127.0.0.1:4002",
+                                    "--out", migrationDumpPath]);
+
+    runChildProcess(dump, "mongodump", function() {
+      oldDb.kill();
+      fs.mkdirSync(dbPath);
+      startMongo(function () {
+        var restore = child_process.spawn("/bin/mongorestore",
+                                          ["--host", "127.0.0.1:4002",
+                                           migrationDumpPath]);
+
+        runChildProcess(restore, "mongorestore", function () {
+          fs.rename(migrationDumpPath, "/var/successfulMigrationDump");
+          runApp();
+        });
+      });
+    });
+  }
+}
 

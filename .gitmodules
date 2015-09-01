@@ -2,3 +2,10 @@
 	path = mongo
 	url = git://github.com/kentonv/mongo.git
 	branch = niscu
+[submodule "niscu"]
+	path = niscu
+	url = https://github.com/kentonv/mongo.git
+	branch = niscu
+[submodule "mongo-tools"]
+	path = mongo-tools
+	url = https://github.com/mongodb/mongo-tools.git
