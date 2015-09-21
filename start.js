@@ -22,6 +22,14 @@
 // Application start script. This launches Mongo, then delegates to main.js.
 // meteor-spk will automatically include this in your package; you don't need
 // to worry about it.
+//
+// The original version of meteor-spk used Niscu[1], a fork of Mongo that adjusts
+// some compiled-in constants to optimize for a small disk footprint. As Mongo 3.0,
+// we no longer need Niscu, because the WiredTiger storage engine can be configured
+// to suit our needs. This script performs the migration from Niscu to Mongo 3.0,
+// if necessary.
+//
+// [1] https://github.com/kentonv/mongo/tree/niscu
 
 var child_process = require("child_process");
 var fs = require("fs");
@@ -56,7 +64,8 @@ function startMongo(continuation) {
                                [ "--fork", "--port", "4002", "--dbpath", dbPath,
                                  "--noauth", "--bind_ip", "127.0.0.1", "--nohttpinterface",
                                  "--storageEngine", "wiredTiger",
-                                 "--wiredTigerEngineConfigString", "log=(prealloc=false,file_max=200KB)",
+                                 "--wiredTigerEngineConfigString",
+                                 "log=(prealloc=false,file_max=200KB)",
                                  "--wiredTigerCacheSizeGB", "1",
                                  "--logpath", dbPath + "/mongo.log" ],
                                { stdio: "inherit" });
@@ -73,6 +82,8 @@ function runApp() {
 }
 
 var migrationDumpPath = "/var/migrationMongoDump";
+// Back when we used mongodump for migration, this was a directory containing the dumped data.
+// Now it's just an empty file, the existence of which implies that a migration is in progress.
 
 if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
   startMongo(runApp);
@@ -115,7 +126,10 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
             var collectionPromises = [];
             oldCollections.forEach(function(oldCollection) {
               console.log("collection: " + oldCollection.collectionName);
-              if (oldCollection.collectionName === "system.indexes") {
+              if (oldCollection.collectionName.slice(0, 7)  === "system.") {
+                // Ignore system.indexes and other special collections.
+                // If the app uses createIndex() or ensureIndex() sensibly, the indexes
+                // should be regenerated on the next start of the app.
                 return;
               }
               var promise = dbs.newDb.createCollection(oldCollection.collectionName)
@@ -141,6 +155,8 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
               // before it sends a confirmation.
 
               fs.unlinkSync(migrationDumpPath);
+              // Success!
+
               runApp();
             });
           });
