@@ -13,7 +13,7 @@ mongo/SConstruct:
 	@false
 
 mongo/mongod: mongo/SConstruct
-	@echo "**** Building MongoDB (modified MongoDB)..."
+	@echo "**** Building MongoDB 3.0 ..."
 	cd mongo && scons -j6 mongod --disable-warnings-as-errors
 
 niscu/SConstruct:

@@ -102,7 +102,8 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
       if (fs.existsSync(dbPath)) {
         fs.rename(dbPath, "/var/failedMigration" + now);
       }
-      fs.unlinkSync(migrationDumpPath);
+      fs.rename(migrationDumpPath, "/var/failedMigrationDump" + now);
+      // Can't just call unlinkSync() because it might be a directory with mongodump contents.
     }
     fs.writeFileSync(migrationDumpPath, "");
 
