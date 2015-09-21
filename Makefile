@@ -1,15 +1,8 @@
 VERSION=0.1.4
 
-meteor-spk.deps: mongo/mongod mongo-tools/bin/mongorestore mongo-tools/bin/mongodump niscu/mongod gather-deps.sh start.js
+meteor-spk.deps: mongo/mongod niscu/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
 	./gather-deps.sh
-
-mongo-tools/build.sh:
-	@echo "**** ERROR: You need to do 'git submodule init; git submodule update' ****"
-	@false
-
-mongo-tools/bin/mongodump mongo-tools/bin/mongorestore: mongo-tools/build.sh
-	cd mongo-tools && ./build.sh
 
 # The following rule is only triggered if the person who
 # cloned this repo forgot to clone with "git clone --recursive".

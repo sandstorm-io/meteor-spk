@@ -96,7 +96,6 @@ mv node_modules bundle/node_modules
 mkdir -p bundle/bin
 cp niscu/mongod bundle/bin/niscud
 cp mongo/mongod bundle/bin/
-cp mongo-tools/bin/mongodump mongo-tools/bin/mongorestore bundle/bin/
 cp $METEOR_DEV_BUNDLE/bin/node bundle/bin
 
 # Binaries copied from Meteor aren't writable by default.
