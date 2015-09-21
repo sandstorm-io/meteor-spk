@@ -25,10 +25,13 @@
 
 var child_process = require("child_process");
 var fs = require("fs");
+var Promise = require("es6-promise").Promise;
+var MongoClient = require('mongodb').MongoClient;
 
 var dbPath = "/var/wiredTigerDb"
 
 function runChildProcess(child, name, continuation) {
+// Runs the process until it exits successfully. Then calls the continuation.
   child.on("error", function (err) {
     console.error("error in " + name + ": "  + err.stack);
     process.exit(1);
@@ -88,34 +91,61 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
       if (fs.existsSync(dbPath)) {
         fs.rename(dbPath, "/var/failedMigration" + now);
       }
-      fs.rename(migrationDumpPath, "/var/failedMigrationDump" + now);
+      fs.unlinkSync(migrationDumpPath);
     }
+    fs.writeFileSync(migrationDumpPath, "");
 
-    console.log("launching niscd");
-    var oldDb = child_process.spawn("/bin/niscud", [ "--port", "4002", "--dbpath", "/var",
-                                                     "--noauth", "--bind_ip", "127.0.0.1",
-                                                     "--nohttpinterface", "--noprealloc",
-                                                     "--logpath", "/var/mongo.log" ], {
-                                                       stdio: "inherit"
-                                                     });
-    // TODO: We ought to wait for "waiting for connections" on stdout.
-    runChildProcess(oldDb, "nisucd", function () {});
-
-    var dump = child_process.spawn("/bin/mongodump",
-                                   ["--host", "127.0.0.1:4002",
-                                    "--out", migrationDumpPath]);
-
-    runChildProcess(dump, "mongodump", function() {
-      oldDb.kill();
-      fs.mkdirSync(dbPath);
+    console.log("launching niscud");
+    var oldDbProcess = child_process.spawn("/bin/niscud", [ "--fork",
+                                                            "--port", "4003", "--dbpath", "/var",
+                                                            "--noauth", "--bind_ip", "127.0.0.1",
+                                                            "--nohttpinterface", "--noprealloc",
+                                                            "--logpath", "/var/mongo.log" ], {
+                                                              stdio: "inherit"
+                                                            });
+    fs.mkdirSync(dbPath);
+    runChildProcess(oldDbProcess, "nisucd", function () {
       startMongo(function () {
-        var restore = child_process.spawn("/bin/mongorestore",
-                                          ["--host", "127.0.0.1:4002",
-                                           migrationDumpPath]);
+        MongoClient.connect("mongodb://127.0.0.1:4003/meteor", {}).then(function(oldDb) {
+          return MongoClient.connect("mongodb://127.0.0.1:4002/meteor", {}).then(function(newDb) {
+            return {oldDb: oldDb, newDb: newDb};
+          });
+        }).then(function (dbs) {
+          return dbs.oldDb.collections().then(function (oldCollections) {
+            var collectionPromises = [];
+            oldCollections.forEach(function(oldCollection) {
+              console.log("collection: " + oldCollection.collectionName);
+              if (oldCollection.collectionName === "system.indexes") {
+                return;
+              }
+              var promise = dbs.newDb.createCollection(oldCollection.collectionName)
+                  .then(function (newCollection) {
+                function insertionLoop(cursor) {
+                  return cursor.hasNext().then(function (hasNext) {
+                    if (hasNext) {
+                      return cursor.next().then(function (doc) {
+                        return newCollection.insertOne(doc).then(function () {
+                          return insertionLoop(cursor);
+                        });
+                      });
+                    }
+                  });
+                }
+                return insertionLoop(oldCollection.find());
+              });
+              collectionPromises.push(promise);
+            });
+            return Promise.all(collectionPromises).then(function () {
+              dbs.oldDb.admin().command({shutdown: 1});
+              // We don't wait for success of this command because the server kills itself
+              // before it sends a confirmation.
 
-        runChildProcess(restore, "mongorestore", function () {
-          fs.rename(migrationDumpPath, "/var/successfulMigrationDump");
-          runApp();
+              fs.unlinkSync(migrationDumpPath);
+              runApp();
+            });
+          });
+        }).catch(function(e) {
+          console.log("error: " + e);
         });
       });
     });

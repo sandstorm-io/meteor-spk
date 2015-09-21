@@ -89,6 +89,9 @@ METEOR_DEV_BUNDLE=$(dirname $(readlink -f "$METEOR_WAREHOUSE_DIR/meteor"))/dev_b
 
 cp start.js bundle/start.js
 
+$METEOR_DEV_BUNDLE/bin/npm install
+mv node_modules bundle/node_modules
+
 # Copy over key binaries.
 mkdir -p bundle/bin
 cp niscu/mongod bundle/bin/niscud
