@@ -39,10 +39,13 @@ var MongoClient = require('mongodb').MongoClient;
 var appPort = "4000";
 var mongoPort = "4001";
 var niscuPort = "4002";
-if (process.argv.length > 2) {
+if (process.argv.length > 3) {
   // You can pass in a port number for the app to listen on:
-  // `node start.js <port number>`
-  var appPortNum = parseInt(process.argv[2]);
+  // `node start.js -p <port number>`
+  if (process.argv[2] !== "-p") {
+    throw new Error("-p is the only option currently supported");
+  }
+  var appPortNum = parseInt(process.argv[3]);
   if (isNaN(appPortNum)) {
     throw new Error("could not parse a port number from: " + process.argv[2]);
   }
