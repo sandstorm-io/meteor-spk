@@ -35,6 +35,9 @@ push: meteor-spk-$(VERSION).tar.xz
 
 clean:
 	rm -rf meteor-spk.deps tmp meteor-spk-$(VERSION).tar.xz
-	cd mongo && scons -c
 
-.PHONY: dist clean push
+reallyclean: clean
+	cd mongo && scons -c
+	cd niscu && scons -c
+
+.PHONY: dist clean reallyclean push
