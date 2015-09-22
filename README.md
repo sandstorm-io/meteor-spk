@@ -62,6 +62,12 @@ To package your existing Meteor app, do the following:
 
 ## Tips
 
+* As of version 0.1.5, `meteor-spk` uses Mongo 3.0. Mongo 2.x does not work
+  well for Sandstorm apps as it pre-allocates far too much disk space
+  expecting a large database; Mongo 3.x mostly avoids preallocation. The
+  differences should be invisible to your app. Note that apps built with
+  previous versions of `meteor-spk` can upgrade safely -- old grains will
+  automatically be migrated to Mongo 3 format on their first run.
 * If your app uses accounts, add the package
   [`kenton:accounts-sandstorm`](https://github.com/sandstorm-io/meteor-accounts-sandstorm)
   to integrate with Sandstorm's login system. (See also
