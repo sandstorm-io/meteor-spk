@@ -1,6 +1,6 @@
 VERSION=0.1.4
 
-meteor-spk.deps: mongo/mongod gather-deps.sh start.js
+meteor-spk.deps: mongo/mongod niscu/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
 	./gather-deps.sh
 
@@ -13,8 +13,16 @@ mongo/SConstruct:
 	@false
 
 mongo/mongod: mongo/SConstruct
+	@echo "**** Building MongoDB 3.0 ..."
+	cd mongo && scons -j6 mongod --disable-warnings-as-errors
+
+niscu/SConstruct:
+	@echo "**** ERROR: You need to do 'git submodule init; git submodule update' ****"
+	@false
+
+niscu/mongod: niscu/SConstruct
 	@echo "**** Building NiscuDB (modified MongoDB)..."
-	cd mongo && scons -j6 mongod
+	cd niscu && scons -j6 mongod --cxx="g++ -Wno-error=unused-variable -Wno-error=strict-overflow" --cc="gcc"
 
 dist: meteor-spk-$(VERSION).tar.xz
 
