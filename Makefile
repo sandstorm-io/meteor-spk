@@ -1,8 +1,9 @@
-VERSION=0.1.4
+VERSION=0.1.5
+METEOR_VERSION=1.2
 
 meteor-spk.deps: mongo/mongod niscu/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
-	./gather-deps.sh
+	./gather-deps.sh $(METEOR_VERSION)
 
 # The following rule is only triggered if the person who
 # cloned this repo forgot to clone with "git clone --recursive".

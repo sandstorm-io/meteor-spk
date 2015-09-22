@@ -37,6 +37,12 @@
 
 set -euo pipefail
 
+if [ $# != 1 ]; then
+  echo "usage: $0 METEOR_VERSION" >&2
+  exit 1
+fi
+METEOR_RELEASE="METEOR@$1"
+
 mkdir -p tmp
 
 copyDep() {
@@ -85,7 +91,12 @@ copyDeps() {
 rm -rf bundle
 mkdir bundle
 METEOR_WAREHOUSE_DIR="${METEOR_WAREHOUSE_DIR:-$HOME/.meteor}"
-METEOR_DEV_BUNDLE=$(dirname $(readlink -f "$METEOR_WAREHOUSE_DIR/meteor"))/dev_bundle
+echo -n "Finding meteor-tool installation (can take a few seconds)..." >&2
+TOOL_VERSION=$(meteor show --ejson $METEOR_RELEASE | grep '^ *"tool":' |
+      sed -re 's/^.*"(meteor-tool@[^"]*)".*$/\1/g')
+TOOLDIR=$(echo $TOOL_VERSION | tr @ /)
+echo " $TOOL_VERSION" >&2
+METEOR_DEV_BUNDLE=$(readlink -f $METEOR_WAREHOUSE_DIR/packages/$TOOLDIR/mt-os.linux.x86_64/dev_bundle)
 
 cp start.js bundle/start.js
 
