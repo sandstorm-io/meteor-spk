@@ -1,4 +1,4 @@
-VERSION=0.1.6
+VERSION=0.1.7
 METEOR_VERSION=1.2
 
 meteor-spk.deps: mongo/mongod niscu/mongod gather-deps.sh start.js
