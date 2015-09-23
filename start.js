@@ -24,7 +24,7 @@
 // to worry about it.
 //
 // The original version of meteor-spk used Niscu[1], a fork of Mongo that adjusts
-// some compiled-in constants to optimize for a small disk footprint. As Mongo 3.0,
+// some compiled-in constants to optimize for a small disk footprint. As of Mongo 3.0,
 // we no longer need Niscu, because the WiredTiger storage engine can be configured
 // to suit our needs. This script performs the migration from Niscu to Mongo 3.0,
 // if necessary.
@@ -35,6 +35,24 @@ var child_process = require("child_process");
 var fs = require("fs");
 var Promise = require("es6-promise").Promise;
 var MongoClient = require('mongodb').MongoClient;
+
+var appPort = "4000";
+var mongoPort = "4001";
+var niscuPort = "4002";
+if (process.argv.length > 3) {
+  // You can pass in a port number for the app to listen on:
+  // `node start.js -p <port number>`
+  if (process.argv[2] !== "-p") {
+    throw new Error("-p is the only option currently supported");
+  }
+  var appPortNum = parseInt(process.argv[3]);
+  if (isNaN(appPortNum)) {
+    throw new Error("could not parse a port number from: " + process.argv[2]);
+  }
+  appPort = appPortNum.toString();
+  mongoPort = (appPortNum + 1).toString();
+  niscuPort = (appPortNum + 2).toString();
+}
 
 var dbPath = "/var/wiredTigerDb"
 
@@ -61,7 +79,7 @@ function runChildProcess(child, name, continuation) {
 function startMongo(continuation) {
   console.log("** Starting Mongo...");
   var db = child_process.spawn("/bin/mongod",
-                               [ "--fork", "--port", "4002", "--dbpath", dbPath,
+                               [ "--fork", "--port", mongoPort, "--dbpath", dbPath,
                                  "--noauth", "--bind_ip", "127.0.0.1", "--nohttpinterface",
                                  "--storageEngine", "wiredTiger",
                                  "--wiredTigerEngineConfigString",
@@ -75,9 +93,9 @@ function startMongo(continuation) {
 
 function runApp() {
   console.log("** Starting Meteor...");
-  process.env.MONGO_URL="mongodb://127.0.0.1:4002/meteor";
-  process.env.ROOT_URL="http://127.0.0.1:4000";
-  process.env.PORT="4000";
+  process.env.MONGO_URL="mongodb://127.0.0.1:" + mongoPort + "/meteor";
+  process.env.ROOT_URL="http://127.0.0.1:" + appPort;
+  process.env.PORT=appPort;
   require("./main.js");
 }
 
@@ -109,7 +127,8 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
 
     console.log("launching niscud");
     var oldDbProcess = child_process.spawn("/bin/niscud", [ "--fork",
-                                                            "--port", "4003", "--dbpath", "/var",
+                                                            "--port", niscuPort,
+                                                            "--dbpath", "/var",
                                                             "--noauth", "--bind_ip", "127.0.0.1",
                                                             "--nohttpinterface", "--noprealloc",
                                                             "--logpath", "/var/mongo.log" ], {
@@ -118,8 +137,10 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
     fs.mkdirSync(dbPath);
     runChildProcess(oldDbProcess, "nisucd", function () {
       startMongo(function () {
-        MongoClient.connect("mongodb://127.0.0.1:4003/meteor", {}).then(function(oldDb) {
-          return MongoClient.connect("mongodb://127.0.0.1:4002/meteor", {}).then(function(newDb) {
+        var niscuUrl = "mongodb://127.0.0.1:" + niscuPort + "/meteor";
+        var mongoUrl = "mongodb://127.0.0.1:" + mongoPort + "/meteor";
+        MongoClient.connect(niscuUrl, {}).then(function(oldDb) {
+          return MongoClient.connect(mongoUrl, {}).then(function(newDb) {
             return {oldDb: oldDb, newDb: newDb};
           });
         }).then(function (dbs) {
