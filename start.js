@@ -118,9 +118,9 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
       console.log("It looks like a previous attempt to migrate failed. Cleaning it up...");
       var now = (new Date()).getTime();
       if (fs.existsSync(dbPath)) {
-        fs.rename(dbPath, "/var/failedMigration" + now);
+        fs.renameSync(dbPath, "/var/failedMigration" + now);
       }
-      fs.rename(migrationDumpPath, "/var/failedMigrationDump" + now);
+      fs.renameSync(migrationDumpPath, "/var/failedMigrationDump" + now);
       // Can't just call unlinkSync() because it might be a directory with mongodump contents.
     }
     fs.writeFileSync(migrationDumpPath, "");
