@@ -139,9 +139,16 @@ if (fs.existsSync(dbPath) && !fs.existsSync(migrationDumpPath)) {
       startMongo(function () {
         var niscuUrl = "mongodb://127.0.0.1:" + niscuPort + "/meteor";
         var mongoUrl = "mongodb://127.0.0.1:" + mongoPort + "/meteor";
-        MongoClient.connect(niscuUrl, {}).then(function(oldDb) {
-          return MongoClient.connect(mongoUrl, {}).then(function(newDb) {
-            return {oldDb: oldDb, newDb: newDb};
+
+        // After `mongod --fork` returns, we still need to wait a bit before mongod is listening. :(
+        var waitForListen = new Promise(function (resolve, reject) {
+          setTimeout(function() { resolve(); }, 1000);
+        });
+        waitForListen.then(function() {
+          return MongoClient.connect(niscuUrl, {}).then(function(oldDb) {
+            return MongoClient.connect(mongoUrl, {}).then(function(newDb) {
+              return {oldDb: oldDb, newDb: newDb};
+            });
           });
         }).then(function (dbs) {
           return dbs.oldDb.collections().then(function (oldCollections) {
