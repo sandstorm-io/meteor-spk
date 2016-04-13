@@ -69,7 +69,9 @@ bundle() {
 
   echo "Building Meteor app..."
   meteor build --directory .meteor-spk
-  (cd .meteor-spk/bundle/programs/server && "$METEOR_DEV_BUNDLE/bin/npm" install)
+  # We prepend $METEOR_DEV_BUNDLE/bin to PATH because the fibers package builds native extensions
+  # choosing the target v8 version based on the version of `/usr/bin/env node`.
+  (cd .meteor-spk/bundle/programs/server && meteor npm install)
 }
 
 case "$COMMAND" in
