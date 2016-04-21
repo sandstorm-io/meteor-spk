@@ -1,5 +1,18 @@
 # Tool for packaging Meteor apps for Sandstorm.io
 
+## THIS IS NOT THE TOOL YOU'RE LOOKING FOR
+
+The recommended way to develop a Meteor app on Sandstorm today is using
+`vagrant-spk`. See the [Meteor packaging tutorial](https://docs.sandstorm.io/en/latest/vagrant-spk/packaging-tutorial-meteor/)
+for instructions.
+
+The tool in this repository, `meteor-spk`, was historically the right tool to
+use before `vagrant-spk` existed, and is now used internally within `vagrant-spk`.
+We no longer recommend using `meteor-spk` directly unless you know what you are
+doing.
+
+## Introduction
+
 [Sandstorm](https://sandstorm.io) is a platform for personal clouds that makes
 installing apps to your personal server as easy as installing apps to your
 phone.
