@@ -101,6 +101,14 @@ METEOR_DEV_BUNDLE=$(readlink -f $METEOR_WAREHOUSE_DIR/packages/$TOOLDIR/mt-os.li
 cp start.js bundle/start.js
 
 $METEOR_DEV_BUNDLE/bin/npm install
+
+# Extract node-capnp build from installed Sandstorm and shove it into node_modules. This makes
+# Npm.require('capnp') "just work" for Meteor Sandstorm apps, which is convenient since it can
+# be tedious to build otherwise. We also copy in the standard .capnp imports that people will
+# need on Sandstorm, so that you can do e.g. require("sandstorm/grain.capnp").
+cp /opt/sandstorm/latest/node_modules/{capnp.node,capnp.js} node_modules
+cp -r /opt/sandstorm/latest/usr/include/{capnp,sandstorm} node_modules
+
 mv node_modules bundle/node_modules
 
 # Copy over key binaries.
