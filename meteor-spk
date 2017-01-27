@@ -67,6 +67,11 @@ makedotdir() {
 bundle() {
   makedotdir
 
+  # The fibers module builds native extensions, choosing the target v8 version based on the version
+  # of `/usr/bin/env node`. We need to make sure that this matches the Meteor node binary that will
+  # be used in our package.
+  export PATH=$METEOR_DEV_BUNDLE/bin:$PATH
+
   echo "Building Meteor app..."
   meteor build --directory .meteor-spk
   (cd .meteor-spk/bundle/programs/server && meteor npm install)
