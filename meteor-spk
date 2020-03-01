@@ -68,6 +68,7 @@ bundle() {
   makedotdir
 
   echo "Building Meteor app..."
+  meteor npm install
   meteor build --directory .meteor-spk
   (cd .meteor-spk/bundle/programs/server && meteor npm install)
 }

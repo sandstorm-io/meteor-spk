@@ -1,4 +1,5 @@
-{ "name": "meteor-spk-start",
+{
+  "name": "meteor-spk-start",
   "repository": "https://github.com/sandstorm-io/meteor-spk",
   "version": "0.1.0",
   "private": false,
