@@ -106,8 +106,12 @@ $METEOR_DEV_BUNDLE/bin/npm install
 # Npm.require('capnp') "just work" for Meteor Sandstorm apps, which is convenient since it can
 # be tedious to build otherwise. We also copy in the standard .capnp imports that people will
 # need on Sandstorm, so that you can do e.g. require("sandstorm/grain.capnp").
-cp /opt/sandstorm/latest/node_modules/{capnp.node,capnp.js} node_modules
-cp -r /opt/sandstorm/latest/usr/include/{capnp,sandstorm} node_modules
+#
+# Note that capnp.node and capnp.js have to got into programs/server/node_modules as Meteor will
+# not search up the tree as of: https://github.com/meteor/meteor/pull/9095
+mkdir -p bundle/programs/server/node_modules
+cp /opt/sandstorm/latest/node_modules/{capnp.node,capnp.js} bundle/programs/server/node_modules
+cp -r /opt/sandstorm/latest/usr/include/{capnp,sandstorm} bundle/programs/server/node_modules
 
 mv node_modules bundle/node_modules
 
@@ -128,6 +132,11 @@ mkdir -p bundle/usr/lib
 cp -r /usr/lib/locale bundle/usr/lib
 mkdir -p bundle/usr/share/locale
 cp /usr/share/locale/locale.alias bundle/usr/share/locale
+
+# Due to a bug in Node 12, /proc/meminfo must exist otherwise the process will die at startup.
+# However, it can be an empty file. See: https://github.com/nodejs/help/issues/2099
+mkdir bundle/proc
+touch bundle/proc/meminfo
 
 # Make bundle smaller by stripping stuff.
 strip bundle/bin/*
