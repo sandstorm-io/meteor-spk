@@ -1,5 +1,5 @@
-VERSION=0.5.1
-METEOR_VERSION=1.10.1
+VERSION=0.6.0
+METEOR_VERSION=2.3.5
 
 meteor-spk.deps: mongo/mongod niscu/mongod gather-deps.sh start.js
 	@echo "**** Gathering dependencies..."
