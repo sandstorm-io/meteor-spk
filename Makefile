@@ -32,7 +32,7 @@ meteor-spk-$(VERSION).tar.xz: meteor-spk meteor-spk.deps README.md NOTICE
 
 push: meteor-spk-$(VERSION).tar.xz
 	grep -q "meteor-spk-$(VERSION)[.]tar" README.md
-	gce-ss copy-files meteor-spk-$(VERSION).tar.xz fe:/var/www/dl.sandstorm.io/meteor-spk-$(VERSION).tar.xz
+	gce-ss copy-files meteor-spk-$(VERSION).tar.xz alpha2:/var/www/dl.sandstorm.io/meteor-spk-$(VERSION).tar.xz
 
 clean:
 	rm -rf meteor-spk.deps tmp meteor-spk-$(VERSION).tar.xz
