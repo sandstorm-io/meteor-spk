@@ -28,13 +28,13 @@ way to do that is:
 ### Installing `meteor-spk` from binaries
 
 1. Download and unpack
-   [the binary distribution](https://dl.sandstorm.io/meteor-spk-0.5.1.tar.xz),
+   [the binary distribution](https://dl.sandstorm.io/meteor-spk-0.6.0.tar.xz),
    e.g.:
 
         mkdir -p ~/projects/meteor-spk
         cd ~/projects/meteor-spk
-        curl https://dl.sandstorm.io/meteor-spk-0.5.1.tar.xz | tar Jxf -
-        cd meteor-spk-0.5.1
+        curl https://dl.sandstorm.io/meteor-spk-0.6.0.tar.xz | tar Jxf -
+        cd meteor-spk-0.6.0
 
 2. Add the directory to your `$PATH`, or symlink the `meteor-spk` script into
    a directory in your `$PATH`, e.g.:
