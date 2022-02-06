@@ -70,7 +70,7 @@ bundle() {
   echo "Building Meteor app..."
   meteor npm install
   meteor build --directory .meteor-spk
-  (cd .meteor-spk/bundle/programs/server && meteor npm install)
+  (cd .meteor-spk/bundle/programs/server && meteor npm install && cd node_modules/fibers && node build.js)
 }
 
 case "$COMMAND" in
